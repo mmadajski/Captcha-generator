@@ -7,12 +7,10 @@ from tensorflow.keras.layers import InputLayer, Input,\
 from random import sample
 import matplotlib.pyplot as plt
 
+
 def train_gan(images, generator, discriminator, combined_model, epochs=100, batch_size=10):
     batches_num = int(images.shape[0] / batch_size)
-    loss_fake = []
-    loss_real = []
     acc_fake = []
-    acc_real = []
 
     for epoch in range(epochs):
         print("Current epoch: ", epoch)
@@ -27,10 +25,7 @@ def train_gan(images, generator, discriminator, combined_model, epochs=100, batc
 
             fake_images_loss = discriminator.train_on_batch(fake_images, np.zeros(batch_size))
             real_images_loss = discriminator.train_on_batch(real_images, np.ones(batch_size))
-            #loss_fake.append(fake_images_loss[0])
             acc_fake.append(fake_images_loss[1])
-            #loss_real.append(real_images_loss[0])
-            #acc_real.append(real_images_loss[1])
 
             combined_model.train_on_batch(tf.random.normal([batch_size, 10]), np.ones(batch_size))
 
@@ -42,7 +37,6 @@ def train_gan(images, generator, discriminator, combined_model, epochs=100, batc
             example_image = (example_image - mini) / (maxi - mini) * 255
             cv2.imwrite("sample_more_filters_epoch_" + str(epoch) + ".png", example_image.astype("uint8"))
 
-    #epochs_list = [i for i in range(0, epochs)]
     plt.plot(acc_fake)
     plt.savefig("acc_fake.png")
     return generator
@@ -71,7 +65,6 @@ generator = tf.keras.Sequential([
     Conv2DTranspose(1, [3, 3], strides=[2, 2], padding="same", activation="tanh")
     ])
 generator.compile(loss='binary_crossentropy', optimizer="adam")
-#generator.summary()
 
 discriminator_cnn = tf.keras.Sequential([
     InputLayer([48, 200, 1]),
@@ -90,7 +83,6 @@ discriminator_cnn = tf.keras.Sequential([
     Dense(10),
     Dense(1, activation="sigmoid")
 ])
-#discriminator_cnn.summary()
 
 discriminator_cnn.compile(loss="binary_crossentropy",
                           optimizer="adam", metrics=["accuracy"])
